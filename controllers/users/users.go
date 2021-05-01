@@ -1,11 +1,11 @@
 package users
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/aditya43/golang-bookstore_users-api/domain/users"
 	"github.com/aditya43/golang-bookstore_users-api/services"
+	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,16 +17,15 @@ func Create(c *gin.Context) {
 	var user users.User
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		// TODO: Return bad request to caller
-		fmt.Println(err.Error())
+		restErr := errors.BadRequestErr("Invalid JSON body")
+		c.JSON(restErr.Status, restErr)
 		return
 	}
 
-	res, err := services.CreateUser(user)
+	res, restErr := services.CreateUser(user)
 
-	if err != nil {
-		// TODO: Handle user creation error
-		fmt.Println(err.Error())
+	if restErr != nil {
+		c.JSON(restErr.Status, restErr)
 		return
 	}
 
