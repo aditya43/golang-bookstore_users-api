@@ -1,5 +1,8 @@
 package users
 
+// DAO: Data Access Object
+// This is the only place where we will interact with database
+
 import (
 	"fmt"
 
@@ -16,6 +19,12 @@ func (user *User) Get() *errors.RESTErr {
 	if res == nil {
 		return errors.NotFoundErr(fmt.Sprintf("User Id %d not found", user.Id))
 	}
+
+	user.Id = res.Id
+	user.Email = res.Email
+	user.FirstName = res.FirstName
+	user.LastName = res.LastName
+	user.DateCreated = res.DateCreated
 
 	return nil
 }

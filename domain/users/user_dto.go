@@ -1,5 +1,7 @@
 package users
 
+// DTO: Data Transfer Object
+
 import (
 	"strings"
 
