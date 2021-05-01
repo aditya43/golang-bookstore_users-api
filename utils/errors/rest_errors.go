@@ -15,3 +15,11 @@ func BadRequestErr(message string) *RESTErr {
 		Error:   "bad_request",
 	}
 }
+
+func NotFoundErr(message string) *RESTErr {
+	return &RESTErr{
+		Message: message,
+		Status:  http.StatusNotFound,
+		Error:   "not_found",
+	}
+}
