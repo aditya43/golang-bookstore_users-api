@@ -10,8 +10,9 @@ import (
 
 const (
 	queryInsertUser = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`) VALUES (?, ?, ?, ?)"
-	queryGetUser    = "SELECT `first_name`, `last_name`, `email`, `date_created` FROM users WHERE id=?"
+	queryGetUser    = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created` FROM users WHERE id=?"
 	queryUpdateUser = "UPDATE users SET `first_name`=?, `last_name`=?, `email`=? WHERE `id`=?"
+	queryDeleteUser = "DELETE FROM users WHERE `id`=?"
 )
 
 func (user *User) Get() *errors.RESTErr {
@@ -69,6 +70,20 @@ func (user *User) Update() *errors.RESTErr {
 		user.LastName,
 		user.Email,
 	); err != nil {
+		return errors.InternalServerErr(err.Error())
+	}
+
+	return nil
+}
+
+func (user *User) Delete() *errors.RESTErr {
+	stmt, err := users_db.DBClient.Prepare(queryDeleteUser)
+	if err != nil {
+		return errors.InternalServerErr(err.Error())
+	}
+	defer stmt.Close()
+
+	if _, err := stmt.Exec(user.Id); err != nil {
 		return errors.InternalServerErr(err.Error())
 	}
 

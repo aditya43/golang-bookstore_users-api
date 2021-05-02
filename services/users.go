@@ -61,3 +61,17 @@ func UpdateUser(isPatchMethod bool, user users.User) (*users.User, *errors.RESTE
 
 	return &user, nil
 }
+
+func DeleteUser(userId int64) *errors.RESTErr {
+	user, err := GetUser(userId)
+	if err != nil {
+		return err
+	}
+
+	user.Id = userId
+	if err := user.Delete(); err != nil {
+		return err
+	}
+
+	return nil
+}
