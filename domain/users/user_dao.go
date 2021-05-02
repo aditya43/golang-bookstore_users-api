@@ -7,8 +7,11 @@ import (
 	"fmt"
 
 	"github.com/aditya43/golang-bookstore_users-api/datasources/mysql/users_db"
-	"github.com/aditya43/golang-bookstore_users-api/utils/date_time"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
+)
+
+const (
+	queryInsertUser = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`) VALUES (?, ?, ?, ?)"
 )
 
 var (
@@ -36,17 +39,22 @@ func (user *User) Get() *errors.RESTErr {
 }
 
 func (user *User) Save() *errors.RESTErr {
-	inDBUser := usersDB[user.Id]
+	stmt, err := users_db.DBClient.Prepare(queryInsertUser)
+	if err != nil {
+		return errors.InternalServerErr(err.Error())
+	}
+	defer stmt.Close()
 
-	if inDBUser != nil {
-		if inDBUser.Email == user.Email {
-			return errors.BadRequestErr(fmt.Sprintf("User Email '%s' already exists", user.Email))
-		}
-
-		return errors.BadRequestErr(fmt.Sprintf("User with id %d already exists", user.Id))
+	insertRes, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	if err != nil {
+		return errors.InternalServerErr(err.Error())
 	}
 
-	user.DateCreated = date_time.GetUTCDateTime()
-	usersDB[user.Id] = user
+	userId, err := insertRes.LastInsertId()
+	if err != nil {
+		return errors.InternalServerErr(err.Error())
+	}
+
+	user.Id = userId
 	return nil
 }
