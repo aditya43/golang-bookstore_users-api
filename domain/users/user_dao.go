@@ -6,6 +6,7 @@ package users
 import (
 	"fmt"
 
+	"github.com/aditya43/golang-bookstore_users-api/datasources/mysql/users_db"
 	"github.com/aditya43/golang-bookstore_users-api/utils/date_time"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 )
@@ -15,6 +16,10 @@ var (
 )
 
 func (user *User) Get() *errors.RESTErr {
+	if err := users_db.DBClient.Ping(); err != nil {
+		panic(err)
+	}
+
 	res := usersDB[user.Id]
 
 	if res == nil {
