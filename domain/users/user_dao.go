@@ -6,6 +6,7 @@ package users
 import (
 	"fmt"
 
+	"github.com/aditya43/golang-bookstore_users-api/utils/date_time"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 )
 
@@ -40,6 +41,7 @@ func (user *User) Save() *errors.RESTErr {
 		return errors.BadRequestErr(fmt.Sprintf("User with id %d already exists", user.Id))
 	}
 
+	user.DateCreated = date_time.GetUTCDateTime()
 	usersDB[user.Id] = user
 	return nil
 }
