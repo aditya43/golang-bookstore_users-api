@@ -48,6 +48,31 @@ func Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, res)
 }
 
+func Update(c *gin.Context) {
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.BadRequestErr("Invalid user id")
+		c.JSON(err.Status, err)
+		return
+	}
+
+	var user users.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.BadRequestErr("Invalid JSON body")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	user.Id = userId
+	res, restErr := services.UpdateUser(user)
+	if restErr != nil {
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
 func Search(c *gin.Context) {
 	c.String(http.StatusNotImplemented, "GET /users/search")
 }
