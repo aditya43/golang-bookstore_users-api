@@ -4,36 +4,33 @@ package users
 // This is the only place where we will interact with database
 
 import (
-	"fmt"
-
 	"github.com/aditya43/golang-bookstore_users-api/datasources/mysql/users_db"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 )
 
 const (
 	queryInsertUser = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`) VALUES (?, ?, ?, ?)"
-)
-
-var (
-	usersDB = make(map[int64]*User)
+	queryGetUser    = "SELECT `first_name`, `last_name`, `email`, `date_created` FROM users WHERE id=?"
 )
 
 func (user *User) Get() *errors.RESTErr {
-	if err := users_db.DBClient.Ping(); err != nil {
-		panic(err)
+	stmt, err := users_db.DBClient.Prepare(queryGetUser)
+	if err != nil {
+		return errors.InternalServerErr(err.Error())
 	}
+	defer stmt.Close()
 
-	res := usersDB[user.Id]
+	res := stmt.QueryRow(user.Id)
 
-	if res == nil {
-		return errors.NotFoundErr(fmt.Sprintf("User Id %d not found", user.Id))
+	if err := res.Scan(
+		&user.Id,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.DateCreated,
+	); err != nil {
+		return errors.InternalServerErr(err.Error())
 	}
-
-	user.Id = res.Id
-	user.Email = res.Email
-	user.FirstName = res.FirstName
-	user.LastName = res.LastName
-	user.DateCreated = res.DateCreated
 
 	return nil
 }
