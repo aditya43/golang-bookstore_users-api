@@ -64,7 +64,8 @@ func Update(c *gin.Context) {
 	}
 
 	user.Id = userId
-	res, restErr := services.UpdateUser(user)
+	isPatchMethod := c.Request.Method == http.MethodPatch
+	res, restErr := services.UpdateUser(isPatchMethod, user)
 	if restErr != nil {
 		c.JSON(restErr.Status, restErr)
 		return
