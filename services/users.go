@@ -75,3 +75,7 @@ func DeleteUser(userId int64) *errors.RESTErr {
 
 	return nil
 }
+
+func FindByStatus(status string) ([]users.User, *errors.RESTErr) {
+	return (&users.User{}).FindByStatus(status)
+}
