@@ -7,7 +7,19 @@ import (
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 )
 
-func GetUser(userId int64) (*users.User, *errors.RESTErr) {
+var UserService userServiceInterface = &userService{}
+
+type userService struct{}
+
+type userServiceInterface interface {
+	GetUser(userId int64) (*users.User, *errors.RESTErr)
+	CreateUser(user users.User) (*users.User, *errors.RESTErr)
+	UpdateUser(isPatchMethod bool, user users.User) (*users.User, *errors.RESTErr)
+	DeleteUser(userId int64) *errors.RESTErr
+	Search(status string) (users.Users, *errors.RESTErr)
+}
+
+func (s *userService) GetUser(userId int64) (*users.User, *errors.RESTErr) {
 	user := &users.User{Id: userId}
 
 	if err := user.Get(); err != nil {
@@ -17,7 +29,7 @@ func GetUser(userId int64) (*users.User, *errors.RESTErr) {
 	return user, nil
 }
 
-func CreateUser(user users.User) (*users.User, *errors.RESTErr) {
+func (s *userService) CreateUser(user users.User) (*users.User, *errors.RESTErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -31,8 +43,8 @@ func CreateUser(user users.User) (*users.User, *errors.RESTErr) {
 	return &user, nil
 }
 
-func UpdateUser(isPatchMethod bool, user users.User) (*users.User, *errors.RESTErr) {
-	currentUser, err := GetUser(user.Id)
+func (s *userService) UpdateUser(isPatchMethod bool, user users.User) (*users.User, *errors.RESTErr) {
+	currentUser, err := UserService.GetUser(user.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +78,8 @@ func UpdateUser(isPatchMethod bool, user users.User) (*users.User, *errors.RESTE
 	return &user, nil
 }
 
-func DeleteUser(userId int64) *errors.RESTErr {
-	user, err := GetUser(userId)
+func (s *userService) DeleteUser(userId int64) *errors.RESTErr {
+	user, err := UserService.GetUser(userId)
 	if err != nil {
 		return err
 	}
@@ -80,6 +92,6 @@ func DeleteUser(userId int64) *errors.RESTErr {
 	return nil
 }
 
-func Search(status string) (users.Users, *errors.RESTErr) {
+func (s *userService) Search(status string) (users.Users, *errors.RESTErr) {
 	return (&users.User{}).FindByStatus(status)
 }
