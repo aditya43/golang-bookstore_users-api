@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/aditya43/golang-bookstore_users-api/domain/users"
+	"github.com/aditya43/golang-bookstore_users-api/utils/crypto_utils"
 	"github.com/aditya43/golang-bookstore_users-api/utils/date_time"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 )
@@ -22,6 +23,7 @@ func CreateUser(user users.User) (*users.User, *errors.RESTErr) {
 	}
 
 	user.DateCreated = date_time.GetUTCDateTimeAPIFormatDBFormat()
+	user.Password = crypto_utils.GetMD5(user.Password)
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
