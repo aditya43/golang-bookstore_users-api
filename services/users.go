@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/aditya43/golang-bookstore_users-api/domain/users"
+	"github.com/aditya43/golang-bookstore_users-api/utils/date_time"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 )
 
@@ -20,6 +21,7 @@ func CreateUser(user users.User) (*users.User, *errors.RESTErr) {
 		return nil, err
 	}
 
+	user.DateCreated = date_time.GetUTCDateTimeAPIFormatDBFormat()
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
