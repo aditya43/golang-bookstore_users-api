@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	queryInsert       = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`) VALUES (?, ?, ?, ?)"
+	queryInsert       = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`, `status`, `password`) VALUES (?, ?, ?, ?, ?, ?)"
 	queryGet          = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created`, `status` FROM users WHERE id=?"
 	queryUpdate       = "UPDATE users SET `first_name`=?, `last_name`=?, `email`=? WHERE `id`=?"
 	queryDelete       = "DELETE FROM users WHERE `id`=?"
@@ -48,7 +48,7 @@ func (user *User) Save() *errors.RESTErr {
 	}
 	defer stmt.Close()
 
-	insertRes, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	insertRes, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Status, user.Password)
 	if err != nil {
 		return errors.InternalServerErr(err.Error())
 	}
