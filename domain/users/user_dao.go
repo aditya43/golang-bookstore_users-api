@@ -4,13 +4,15 @@ package users
 // This is the only place where we will interact with database
 
 import (
+	"fmt"
+
 	"github.com/aditya43/golang-bookstore_users-api/datasources/mysql/users_db"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 )
 
 const (
 	queryInsert       = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`) VALUES (?, ?, ?, ?)"
-	queryGet          = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created` FROM users WHERE id=?"
+	queryGet          = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created`, `status` FROM users WHERE id=?"
 	queryUpdate       = "UPDATE users SET `first_name`=?, `last_name`=?, `email`=? WHERE `id`=?"
 	queryDelete       = "DELETE FROM users WHERE `id`=?"
 	queryFindByStatus = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created`, `status` FROM users WHERE status=?"
@@ -31,6 +33,7 @@ func (user *User) Get() *errors.RESTErr {
 		&user.LastName,
 		&user.Email,
 		&user.DateCreated,
+		&user.Status,
 	); err != nil {
 		return errors.InternalServerErr(err.Error())
 	}
@@ -105,6 +108,25 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RESTErr) {
 	defer rows.Close()
 
 	results := make([]User, 0)
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(
+			&user.Id,
+			&user.FirstName,
+			&user.LastName,
+			&user.Email,
+			&user.DateCreated,
+			&user.Status,
+		); err != nil {
+			return nil, errors.InternalServerErr(err.Error())
+		}
+
+		results = append(results, user)
+	}
+
+	if len(results) == 0 {
+		return nil, errors.NotFoundErr(fmt.Sprintf("0 results found for status = '%s'", status))
+	}
 
 	return results, nil
 }
