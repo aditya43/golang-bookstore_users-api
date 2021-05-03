@@ -5,6 +5,7 @@ package users
 import (
 	"strings"
 
+	"github.com/aditya43/golang-bookstore_users-api/utils/date_time"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 )
 
@@ -14,11 +15,16 @@ type User struct {
 	LastName    string `json:"last_name"`
 	Email       string `json:"email"`
 	DateCreated string `json:"date_created"`
+	Status      string `json:"status"`
+	Password    string `json:"-"` // To exclude password field when dealing with JSON
 }
 
 func (user *User) Validate() *errors.RESTErr {
-	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
+	user.FirstName = strings.TrimSpace(user.FirstName)
+	user.LastName = strings.TrimSpace(user.LastName)
+	user.DateCreated = date_time.GetUTCDateTimeAPIFormatDBFormat()
 
+	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	if user.Email == "" {
 		return errors.BadRequestErr("Invalid or empty email address")
 	}

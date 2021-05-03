@@ -48,8 +48,60 @@ func Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, res)
 }
 
+func Update(c *gin.Context) {
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.BadRequestErr("Invalid user id")
+		c.JSON(err.Status, err)
+		return
+	}
+
+	var user users.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.BadRequestErr("Invalid JSON body")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	user.Id = userId
+	isPatchMethod := c.Request.Method == http.MethodPatch
+	res, restErr := services.UpdateUser(isPatchMethod, user)
+	if restErr != nil {
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func Delete(c *gin.Context) {
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.BadRequestErr("Invalid user id")
+		c.JSON(err.Status, err)
+		return
+	}
+
+	err := services.DeleteUser(userId)
+
+	if err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
+}
+
 func Search(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "GET /users/search")
+	status := c.Query("status")
+
+	users, err := services.Search(status)
+	if err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
 }
 
 /*
