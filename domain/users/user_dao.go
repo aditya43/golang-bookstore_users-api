@@ -9,14 +9,15 @@ import (
 )
 
 const (
-	queryInsertUser = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`) VALUES (?, ?, ?, ?)"
-	queryGetUser    = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created` FROM users WHERE id=?"
-	queryUpdateUser = "UPDATE users SET `first_name`=?, `last_name`=?, `email`=? WHERE `id`=?"
-	queryDeleteUser = "DELETE FROM users WHERE `id`=?"
+	queryInsert       = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`) VALUES (?, ?, ?, ?)"
+	queryGet          = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created` FROM users WHERE id=?"
+	queryUpdate       = "UPDATE users SET `first_name`=?, `last_name`=?, `email`=? WHERE `id`=?"
+	queryDelete       = "DELETE FROM users WHERE `id`=?"
+	queryFindByStatus = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created`, `status` FROM users WHERE status=?"
 )
 
 func (user *User) Get() *errors.RESTErr {
-	stmt, err := users_db.DBClient.Prepare(queryGetUser)
+	stmt, err := users_db.DBClient.Prepare(queryGet)
 	if err != nil {
 		return errors.InternalServerErr(err.Error())
 	}
@@ -38,7 +39,7 @@ func (user *User) Get() *errors.RESTErr {
 }
 
 func (user *User) Save() *errors.RESTErr {
-	stmt, err := users_db.DBClient.Prepare(queryInsertUser)
+	stmt, err := users_db.DBClient.Prepare(queryInsert)
 	if err != nil {
 		return errors.InternalServerErr(err.Error())
 	}
@@ -59,7 +60,7 @@ func (user *User) Save() *errors.RESTErr {
 }
 
 func (user *User) Update() *errors.RESTErr {
-	stmt, err := users_db.DBClient.Prepare(queryUpdateUser)
+	stmt, err := users_db.DBClient.Prepare(queryUpdate)
 	if err != nil {
 		return errors.InternalServerErr(err.Error())
 	}
@@ -77,7 +78,7 @@ func (user *User) Update() *errors.RESTErr {
 }
 
 func (user *User) Delete() *errors.RESTErr {
-	stmt, err := users_db.DBClient.Prepare(queryDeleteUser)
+	stmt, err := users_db.DBClient.Prepare(queryDelete)
 	if err != nil {
 		return errors.InternalServerErr(err.Error())
 	}
@@ -88,4 +89,22 @@ func (user *User) Delete() *errors.RESTErr {
 	}
 
 	return nil
+}
+
+func (user *User) FindByStatus(status string) ([]User, *errors.RESTErr) {
+	stmt, err := users_db.DBClient.Prepare(queryFindByStatus)
+	if err != nil {
+		return nil, errors.InternalServerErr(err.Error())
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(status)
+	if err != nil {
+		return nil, errors.InternalServerErr(err.Error())
+	}
+	defer rows.Close()
+
+	results := make([]User, 0)
+
+	return results, nil
 }
