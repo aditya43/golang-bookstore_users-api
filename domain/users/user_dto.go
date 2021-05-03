@@ -19,6 +19,8 @@ type User struct {
 	Password    string `json:"-"` // To exclude password field when dealing with JSON
 }
 
+type Users []User
+
 func (user *User) Validate() *errors.RESTErr {
 	user.FirstName = strings.TrimSpace(user.FirstName)
 	user.LastName = strings.TrimSpace(user.LastName)

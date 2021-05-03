@@ -38,3 +38,13 @@ func (user *User) Marshall(isPublic bool) interface{} {
 	_ = json.Unmarshal(userJSON, &privateUser)
 	return privateUser
 }
+
+func (users Users) Marshall(isPublic bool) []interface{} {
+	result := make([]interface{}, len(users))
+
+	for i, user := range users {
+		result[i] = user.Marshall(isPublic)
+	}
+
+	return result
+}

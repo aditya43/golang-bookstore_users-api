@@ -80,6 +80,6 @@ func DeleteUser(userId int64) *errors.RESTErr {
 	return nil
 }
 
-func Search(status string) ([]users.User, *errors.RESTErr) {
+func Search(status string) (users.Users, *errors.RESTErr) {
 	return (&users.User{}).FindByStatus(status)
 }
