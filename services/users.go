@@ -9,6 +9,8 @@ import (
 
 var UserService userServiceInterface = &userService{}
 
+type userService struct{}
+
 type userServiceInterface interface {
 	GetUser(userId int64) (*users.User, *errors.RESTErr)
 	CreateUser(user users.User) (*users.User, *errors.RESTErr)
