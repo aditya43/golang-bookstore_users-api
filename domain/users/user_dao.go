@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/aditya43/golang-bookstore_users-api/datasources/mysql/users_db"
+	"github.com/aditya43/golang-bookstore_users-api/logger"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
 )
 
@@ -21,7 +22,8 @@ const (
 func (user *User) Get() *errors.RESTErr {
 	stmt, err := users_db.DBClient.Prepare(queryGet)
 	if err != nil {
-		return errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
 	}
 	defer stmt.Close()
 
@@ -35,7 +37,8 @@ func (user *User) Get() *errors.RESTErr {
 		&user.DateCreated,
 		&user.Status,
 	); err != nil {
-		return errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
 	}
 
 	return nil
@@ -44,18 +47,21 @@ func (user *User) Get() *errors.RESTErr {
 func (user *User) Save() *errors.RESTErr {
 	stmt, err := users_db.DBClient.Prepare(queryInsert)
 	if err != nil {
-		return errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
 	}
 	defer stmt.Close()
 
 	insertRes, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Status, user.Password)
 	if err != nil {
-		return errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
 	}
 
 	userId, err := insertRes.LastInsertId()
 	if err != nil {
-		return errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
 	}
 
 	user.Id = userId
@@ -65,7 +71,8 @@ func (user *User) Save() *errors.RESTErr {
 func (user *User) Update() *errors.RESTErr {
 	stmt, err := users_db.DBClient.Prepare(queryUpdate)
 	if err != nil {
-		return errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
 	}
 	defer stmt.Close()
 
@@ -74,7 +81,8 @@ func (user *User) Update() *errors.RESTErr {
 		user.LastName,
 		user.Email,
 	); err != nil {
-		return errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
 	}
 
 	return nil
@@ -83,12 +91,14 @@ func (user *User) Update() *errors.RESTErr {
 func (user *User) Delete() *errors.RESTErr {
 	stmt, err := users_db.DBClient.Prepare(queryDelete)
 	if err != nil {
-		return errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
 	}
 	defer stmt.Close()
 
 	if _, err := stmt.Exec(user.Id); err != nil {
-		return errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
 	}
 
 	return nil
@@ -97,13 +107,15 @@ func (user *User) Delete() *errors.RESTErr {
 func (user *User) FindByStatus(status string) ([]User, *errors.RESTErr) {
 	stmt, err := users_db.DBClient.Prepare(queryFindByStatus)
 	if err != nil {
-		return nil, errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return nil, errors.InternalServerErr("Something went wrong!")
 	}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(status)
 	if err != nil {
-		return nil, errors.InternalServerErr(err.Error())
+		logger.Error(err)
+		return nil, errors.InternalServerErr("Something went wrong!")
 	}
 	defer rows.Close()
 
@@ -118,7 +130,8 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RESTErr) {
 			&user.DateCreated,
 			&user.Status,
 		); err != nil {
-			return nil, errors.InternalServerErr(err.Error())
+			logger.Error(err)
+			return nil, errors.InternalServerErr("Something went wrong!")
 		}
 
 		results = append(results, user)
