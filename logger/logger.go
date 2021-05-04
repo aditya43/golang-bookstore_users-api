@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var Log *zap.Logger
+var log *zap.Logger
 
 func init() {
 	logConfig := zap.Config{
@@ -24,7 +24,12 @@ func init() {
 	}
 
 	var err error
-	if Log, err = logConfig.Build(); err != nil {
+	if log, err = logConfig.Build(); err != nil {
 		panic(err)
 	}
+}
+
+func Info(msg string, tags ...zap.Field) {
+	log.Info(msg, tags...)
+	log.Sync()
 }
