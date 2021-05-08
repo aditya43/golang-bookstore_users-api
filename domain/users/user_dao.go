@@ -12,11 +12,12 @@ import (
 )
 
 const (
-	queryInsert       = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`, `status`, `password`) VALUES (?, ?, ?, ?, ?, ?)"
-	queryGet          = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created`, `status` FROM users WHERE id=?"
-	queryUpdate       = "UPDATE users SET `first_name`=?, `last_name`=?, `email`=? WHERE `id`=?"
-	queryDelete       = "DELETE FROM users WHERE `id`=?"
-	queryFindByStatus = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created`, `status` FROM users WHERE status=?"
+	queryInsert              = "INSERT INTO users (`first_name`, `last_name`, `email`, `date_created`, `status`, `password`) VALUES (?, ?, ?, ?, ?, ?)"
+	queryGet                 = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created`, `status` FROM users WHERE id=?"
+	queryUpdate              = "UPDATE users SET `first_name`=?, `last_name`=?, `email`=? WHERE `id`=?"
+	queryDelete              = "DELETE FROM users WHERE `id`=?"
+	queryFindByStatus        = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created`, `status` FROM users WHERE status=?"
+	queryFindByEmailPassword = "SELECT `id`, `first_name`, `last_name`, `email`, `date_created`, `status` FROM users WHERE email=? AND password=?"
 )
 
 func (user *User) Get() *errors.RESTErr {
@@ -142,4 +143,29 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RESTErr) {
 	}
 
 	return results, nil
+}
+
+func (user *User) FindByEmailPassword() *errors.RESTErr {
+	stmt, err := users_db.DBClient.Prepare(queryFindByEmailPassword)
+	if err != nil {
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
+	}
+	defer stmt.Close()
+
+	res := stmt.QueryRow(user.Email, user.Password)
+
+	if err := res.Scan(
+		&user.Id,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.DateCreated,
+		&user.Status,
+	); err != nil {
+		logger.Error(err)
+		return errors.InternalServerErr("Something went wrong!")
+	}
+
+	return nil
 }
