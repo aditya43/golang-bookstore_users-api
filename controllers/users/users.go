@@ -104,6 +104,23 @@ func Search(c *gin.Context) {
 	c.JSON(http.StatusOK, users.Marshall(c.GetHeader("X-PUBLIC") == "true"))
 }
 
+func Authenticate(c *gin.Context) {
+	var loginRequest users.LoginRequest
+
+	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+		restErr := errors.BadRequestErr("Invalid credentials")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	user, err := services.UserService.Authenticate(&loginRequest)
+	if err != nil {
+		c.JSON(err.Status, err)
+	}
+
+	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-PUBLIC") == "true"))
+}
+
 /*
 // One way to unmarshall JSON and populate user struct with the values
 func Create(c *gin.Context) {
