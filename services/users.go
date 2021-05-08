@@ -12,17 +12,31 @@ var UserService userServiceInterface = &userService{}
 type userService struct{}
 
 type userServiceInterface interface {
-	GetUser(userId int64) (*users.User, *errors.RESTErr)
-	CreateUser(user users.User) (*users.User, *errors.RESTErr)
-	UpdateUser(isPatchMethod bool, user users.User) (*users.User, *errors.RESTErr)
-	DeleteUser(userId int64) *errors.RESTErr
-	Search(status string) (users.Users, *errors.RESTErr)
+	GetUser(int64) (*users.User, *errors.RESTErr)
+	Authenticate(*users.LoginRequest) (*users.User, *errors.RESTErr)
+	CreateUser(users.User) (*users.User, *errors.RESTErr)
+	UpdateUser(bool, users.User) (*users.User, *errors.RESTErr)
+	DeleteUser(int64) *errors.RESTErr
+	Search(string) (users.Users, *errors.RESTErr)
 }
 
 func (s *userService) GetUser(userId int64) (*users.User, *errors.RESTErr) {
 	user := &users.User{Id: userId}
 
 	if err := user.Get(); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *userService) Authenticate(loginRequest *users.LoginRequest) (*users.User, *errors.RESTErr) {
+	user := &users.User{
+		Email:    loginRequest.Email,
+		Password: crypto_utils.GetMD5(loginRequest.Password),
+	}
+
+	if err := user.FindByEmailPassword(); err != nil {
 		return nil, err
 	}
 
