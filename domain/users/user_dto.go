@@ -16,7 +16,7 @@ type User struct {
 	Email       string `json:"email"`
 	DateCreated string `json:"date_created"`
 	Status      string `json:"status"`
-	Password    string `json:"-"` // To exclude password field when dealing with JSON
+	Password    string `json:"password"` // To exclude password field when dealing with JSON
 }
 
 type Users []User
@@ -25,10 +25,15 @@ func (user *User) Validate() *errors.RESTErr {
 	user.FirstName = strings.TrimSpace(user.FirstName)
 	user.LastName = strings.TrimSpace(user.LastName)
 	user.DateCreated = date_time.GetUTCDateTimeAPIFormatDBFormat()
-
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
+	user.Password = strings.TrimSpace(strings.ToLower(user.Password))
+
 	if user.Email == "" {
 		return errors.BadRequestErr("Invalid or empty email address")
+	}
+
+	if user.Password == "" {
+		return errors.BadRequestErr("Invalid or empty password")
 	}
 
 	return nil
