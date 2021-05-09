@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aditya43/bookstore-oauth-go/oauth"
 	"github.com/aditya43/golang-bookstore_users-api/domain/users"
 	"github.com/aditya43/golang-bookstore_users-api/services"
 	"github.com/aditya43/golang-bookstore_users-api/utils/errors"
@@ -11,6 +12,11 @@ import (
 )
 
 func Get(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
 	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
 
 	if userErr != nil {
@@ -26,10 +32,20 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-PUBLIC") == "true"))
+	if oauth.GetUserId(c.Request) == user.Id {
+		c.JSON(http.StatusOK, user.Marshall(false))
+		return
+	}
+
+	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func Create(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
 	var user users.User
 
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -45,10 +61,15 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, res.Marshall(c.GetHeader("X-PUBLIC") == "true"))
+	c.JSON(http.StatusCreated, res.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func Update(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
 	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
 	if userErr != nil {
 		err := errors.BadRequestErr("Invalid user id")
@@ -71,10 +92,15 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, res.Marshall(c.GetHeader("X-PUBLIC") == "true"))
+	c.JSON(http.StatusOK, res.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func Delete(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
 	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
 	if userErr != nil {
 		err := errors.BadRequestErr("Invalid user id")
@@ -93,6 +119,11 @@ func Delete(c *gin.Context) {
 }
 
 func Search(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
 	status := c.Query("status")
 
 	users, err := services.UserService.Search(status)
@@ -101,7 +132,7 @@ func Search(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users.Marshall(c.GetHeader("X-PUBLIC") == "true"))
+	c.JSON(http.StatusOK, users.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func Authenticate(c *gin.Context) {
@@ -118,7 +149,7 @@ func Authenticate(c *gin.Context) {
 		c.JSON(err.Status, err)
 	}
 
-	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-PUBLIC") == "true"))
+	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
 }
 
 /*
