@@ -11,7 +11,7 @@ var (
 )
 
 func StartApplication() {
-	gin.SetMode(env.Get("GIN_MODE"))
+	gin.SetMode(env.Get("RELEASE_ENVIRONMENT"))
 	mapUrls()
 
 	logger.Info("Application starting...")

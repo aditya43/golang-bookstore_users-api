@@ -9,11 +9,11 @@ import (
 var log *zap.Logger
 
 func init() {
-	if env.Get("GIN_MODE") == "release" {
+	if env.Get("RELEASE_ENVIRONMENT") == "release" {
 		buildProductionLogger()
 	}
 
-	if env.Get("GIN_MODE") != "release" {
+	if env.Get("RELEASE_ENVIRONMENT") != "release" {
 		buildDevelopmentLogger()
 	}
 }
